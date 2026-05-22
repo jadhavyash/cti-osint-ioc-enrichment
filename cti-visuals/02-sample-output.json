@@ -1,0 +1,57 @@
+{
+  "generated": "2025-11-15T14:32:11",
+  "total_iocs": 4,
+  "malicious": 2,
+  "suspicious": 1,
+  "clean": 1,
+  "results": [
+    {
+      "ioc": "185.220.101.45",
+      "type": "ip",
+      "overall_verdict": "MALICIOUS",
+      "priority": "HIGH",
+      "enrichments": [
+        {
+          "source": "VirusTotal",
+          "malicious": 12,
+          "suspicious": 2,
+          "verdict": "MALICIOUS",
+          "country": "DE",
+          "reputation": -85
+        },
+        {
+          "source": "AbuseIPDB",
+          "abuse_score": 100,
+          "total_reports": 847,
+          "isp": "Tor Exit Node",
+          "country": "DE",
+          "verdict": "MALICIOUS"
+        }
+      ]
+    },
+    {
+      "ioc": "8.8.8.8",
+      "type": "ip",
+      "overall_verdict": "CLEAN",
+      "priority": "LOW",
+      "enrichments": [
+        {
+          "source": "VirusTotal",
+          "malicious": 0,
+          "suspicious": 0,
+          "harmless": 70,
+          "verdict": "CLEAN",
+          "country": "US",
+          "reputation": 191
+        },
+        {
+          "source": "AbuseIPDB",
+          "abuse_score": 0,
+          "total_reports": 0,
+          "isp": "Google LLC",
+          "verdict": "CLEAN"
+        }
+      ]
+    }
+  ]
+}
