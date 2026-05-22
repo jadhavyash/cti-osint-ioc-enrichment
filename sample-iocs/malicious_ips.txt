@@ -1,0 +1,8 @@
+# Sample IOC file — one per line (ioc,type)
+# Known malicious IPs from public threat feeds
+185.220.101.45,ip
+185.220.101.34,ip
+91.108.4.0,ip
+194.165.16.78,ip
+malware-c2.example.com,domain
+phishing.example.net,domain
