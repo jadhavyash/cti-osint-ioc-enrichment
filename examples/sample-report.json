@@ -1,0 +1,45 @@
+{
+  "generated": "2026-10-10T23:25:37.303798+00:00",
+  "total_iocs": 1,
+  "counts": {
+    "malicious": 0,
+    "suspicious": 0,
+    "no_detection": 1,
+    "unknown": 0
+  },
+  "results": [
+    {
+      "ioc": "8.8.8.8",
+      "type": "ip",
+      "timestamp": "2026-10-10T23:25:37.303798+00:00",
+      "sources": [
+        {
+          "source": "VirusTotal",
+          "status": "ok",
+          "verdict": "no_detection",
+          "malicious_engines": 0,
+          "suspicious_engines": 0,
+          "last_analysis_date": 1791659180
+        },
+        {
+          "source": "AbuseIPDB",
+          "status": "ok",
+          "verdict": "no_detection",
+          "abuse_confidence_score": 0,
+          "total_reports": 235,
+          "last_reported": "2026-10-10T21:32:02+00:00"
+        },
+        {
+          "source": "MISP",
+          "status": "not_configured"
+        }
+      ],
+      "assessment": {
+        "verdict": "no_detection",
+        "confidence": "not_assessed",
+        "priority": "low",
+        "reason": "Rule-based assessment of external sources; not proof of compromise or attribution"
+      }
+    }
+  ]
+}

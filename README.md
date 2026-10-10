@@ -4,9 +4,19 @@ A defensive Python portfolio project for cyber threat intelligence collection, e
 
 **Sources:** VirusTotal, AbuseIPDB (IP only), optional MISP. **Outputs:** machine-readable JSON and analyst-readable Markdown reports.
 
-## Architecture
+## Pipeline architecture
 
-`CLI / CSV → validation → source APIs → evidence aggregation → rule-based assessment → JSON + Markdown reports`
+![CTI IOC enrichment pipeline architecture](cti-visuals/pipeline-architecture.svg)
+
+The diagram shows the implemented workflow. MISP is optional and requires an authorized server; the pipeline does not perform automatic threat actor attribution.
+
+## Example investigation and reports
+
+- [End-to-end investigation: 8.8.8.8](docs/investigation-example.md) — an actual public DNS IP enrichment test, not a simulated malicious incident.
+- [Sanitized JSON output](examples/sample-report.json) — generated from a successful live test, with no credentials.
+- [Sanitized Markdown report](examples/sample-report.md) — analyst-readable output.
+
+**Note:** A no-detection result is not proof that an indicator is safe. Reputation data is only one input to an investigation.
 
 ## Quick start
 
