@@ -1,102 +1,59 @@
 # CTI / OSINT IOC Enrichment Pipeline
 
-**Automated cyber threat intelligence pipeline — enriches IOCs (IPs, domains, URLs, hashes) against VirusTotal, AbuseIPDB, and MISP using Python.**
+A defensive Python portfolio project for cyber threat intelligence collection, enrichment, prioritization, and reporting. It supports IPv4/IPv6, domains, HTTP(S) URLs, and MD5/SHA1/SHA256 hashes.
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
-![VirusTotal](https://img.shields.io/badge/VirusTotal_API-394EFF?style=flat)
-![AbuseIPDB](https://img.shields.io/badge/AbuseIPDB_API-CC0000?style=flat)
-![MISP](https://img.shields.io/badge/MISP_Integration-007DC6?style=flat)
+**Sources:** VirusTotal, AbuseIPDB (IP only), optional MISP. **Outputs:** machine-readable JSON and analyst-readable Markdown reports.
 
-## What It Does
+## Architecture
 
-```
-Input IOC (IP/domain/hash/URL)
-        │
-        ├──▶ VirusTotal API    → malicious/clean verdict + engine count
-        ├──▶ AbuseIPDB API     → abuse confidence score + report history
-        └──▶ MISP              → known threat actor attribution
-                │
-                ▼
-        Aggregated JSON Report
-        Priority: HIGH / MEDIUM / LOW
-        Overall Verdict: MALICIOUS / SUSPICIOUS / CLEAN
-```
+`CLI / CSV → validation → source APIs → evidence aggregation → rule-based assessment → JSON + Markdown reports`
 
-## Results
+## Quick start
 
-| Metric | Value |
-|--------|-------|
-| IOC triage time reduction | 60% vs manual lookup |
-| Supported IOC types | IP, domain, URL, MD5/SHA256 hash |
-| Threat feed sources | VirusTotal, AbuseIPDB, MISP |
-| Output format | JSON report + console summary |
-
-## Quick Start
+Requires Python 3.10+.
 
 ```bash
-git clone https://github.com/yash-jadhav/cti-osint-ioc-enrichment
-cd cti-osint-ioc-enrichment
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-
-# Add API keys to ioc_pipeline.py
-# VT_API_KEY    = "your_key"   # free at virustotal.com
-# ABUSE_API_KEY = "your_key"   # free at abuseipdb.com
-
-# Enrich a single IP
-python ioc_pipeline.py --ioc 8.8.8.8 --type ip
-
-# Enrich a domain
-python ioc_pipeline.py --ioc malware-c2.example.com --type domain
-
-# Bulk enrich from file
-python ioc_pipeline.py --file sample-iocs/malicious_ips.txt
+cp .env.example .env   # Windows PowerShell: Copy-Item .env.example .env
+# Add your own API keys to .env; never commit .env
+python -m cti_pipeline --ioc 8.8.8.8 --type ip
+python -m cti_pipeline --file examples/sample_iocs.csv
+pytest -q
 ```
 
-## Sample Output
+Without configured API keys, the pipeline still runs and correctly marks findings **unknown** rather than clean. To get real enrichment results, configure `VT_API_KEY`, `ABUSE_API_KEY`, and optionally `MISP_URL`, `MISP_API_KEY`, and `MISP_CA_BUNDLE` (trusted CA bundle path for private certificates).
 
-```json
-{
-  "ioc": "185.220.101.45",
-  "type": "ip",
-  "timestamp": "2025-11-15T14:32:11",
-  "overall_verdict": "MALICIOUS",
-  "priority": "HIGH",
-  "enrichments": [
-    {
-      "source": "VirusTotal",
-      "malicious": 12,
-      "suspicious": 2,
-      "verdict": "MALICIOUS",
-      "country": "DE",
-      "reputation": -85
-    },
-    {
-      "source": "AbuseIPDB",
-      "abuse_score": 100,
-      "total_reports": 847,
-      "isp": "Tor Exit Node",
-      "verdict": "MALICIOUS"
-    }
-  ]
-}
-```
+## Verdict model
 
-## IOC Input File Format
+This is an intentionally transparent **prototype heuristic**:
 
-```
-# iocs.txt — one IOC per line (ioc,type)
-185.220.101.45,ip
-malware-c2.example.com,domain
-44d88612fea8a8f36de82e1278abb02f,hash
-http://phishing.example.com/login,url
-```
+- VirusTotal: 3+ malicious engine detections → malicious; 1–2 malicious or 2+ suspicious → suspicious; otherwise no detection.
+- AbuseIPDB: score ≥75 → malicious; ≥25 → suspicious; otherwise no detection.
+- MISP: matching attribute → known indicator; no match → no detection. A MISP match alone does not establish attribution or maliciousness.
+- Aggregation: any malicious/known indicator → high priority; otherwise suspicious → medium; otherwise no detection → low. If all sources fail or are unconfigured → unknown/review.
 
-## Requirements
+These are not calibrated probabilities. **No detection does not mean safe**, and priority is not a replacement for business impact assessment. Verify indicator relevance, freshness, source reliability, and internal telemetry before blocking.
 
-```
-requests>=2.31.0
-```
+## Safety and limitations
 
-Free API keys:
-- VirusTotal: https://www.virustotal.com/gui/my-apikey (4 req/min free)
-- AbuseIPDB: https://www.abuseipdb.com/account/api (1000 req/day free)
+- The tool makes reputation lookups only. It does not visit submitted URLs, run malware, crawl dark web content, or scan remote hosts.
+- Sending indicators to third-party services can disclose investigation details. Use only approved, non-sensitive indicators.
+- MISP searches require a functioning authorized MISP server; integration is not proven merely by configuration.
+- Current implementation is sequential and does not implement a persistent quota scheduler, deduplication, automatic ATT&CK mapping, threat actor attribution, or LLM analysis.
+- Source timestamps and contextual risk should be validated by an analyst. API quotas vary by account and must be respected.
+- Reports are prototypes for analyst review, not verified intelligence products.
+
+## Testing
+
+`pytest -q` runs offline unit tests using mocked source responses. See `docs/methodology.md` for known limitations and extension ideas.
+
+## Future improvements
+
+Persistent per-provider rate limiting, source-specific caching, richer MISP event context, STIX/TAXII interoperability, internal telemetry correlation, documented benchmark datasets, human-reviewed AI summaries, and evidence-based MITRE ATT&CK mapping.
+
+## License
+
+MIT. See LICENSE.
